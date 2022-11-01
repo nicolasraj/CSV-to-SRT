@@ -6,3 +6,4 @@ RUN pip3 install pysrt
 RUN pip3 install streamlit
 COPY . .
 CMD streamlit run Translation.py --server.port $PORT
+#CMD streamlit run Translation.py

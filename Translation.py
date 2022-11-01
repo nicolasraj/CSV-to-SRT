@@ -35,30 +35,31 @@ def srttoexcel():
     return df
 
 
-def exceltosrt(full_df):
+def exceltosrt(full_df, refLang1, lang1):
     #full_df = pd.read_excel('subs.xlsx', header=None, dtype=str)
-    full_df.columns = [refLang,'1','2','3','4']
+    full_df.columns = [refLang1,'1','2','3','4']
     #lang = lang
     #Get subs file
     #xlsx=pd.read_csv('Translation - Lyric Library.csv')
     xlsx=df
-    xlsx_link=xlsx[[refLang,lang]]
+    xlsx_link=xlsx[[refLang1,lang1]]
 
-    check = full_df.merge(xlsx_link, on=refLang, how='left')
-    xlsx = check[[lang,'1','2','3','4']]
+    check = full_df.merge(xlsx_link, on=refLang1, how='left')
+    xlsx = check[[lang1,'1','2','3','4']]
 
     sheet1 = xlsx
     sheet1.columns = ["text", "start", "start_milli", "end", "end_milli"]
 
 
     counter = 1
-    with open(lang+".srt", 'w', encoding='utf-8') as file:
+    with open(lang1+".srt", 'w', encoding='utf-8') as file:
         for index, row in sheet1.iterrows():
             milli1 = str(row['start_milli'])[:-3]
             milli2 = str(row['end_milli'])[:-3]
             print("%d\n%s,%s --> %s,%s\n%s\n" % (
                 counter, row["start"], milli1, row["end"], milli2, row["text"]), file=file)
             counter += 1
+    return(lang1)
 
 def get_binary_file_downloader_html(bin_file, file_label='File'):
     with open(bin_file, 'rb') as f:
@@ -80,7 +81,7 @@ with st.spinner("Loading ..."):
     st.sidebar.info("Upload the Lyric Library and Reference SRT")
 
     #Upload LyricLibrary
-    lyriclibary = st.sidebar.file_uploader("Upload Lyric Library CSV File:", encoding =None, key = 'a', type=("csv"))
+    lyriclibary = st.sidebar.file_uploader("Upload Lyric Library CSV File:", key = 'a', type=("csv"))
     if lyriclibary is not None:
         lyriclibary.seek(0)
         try:
@@ -100,20 +101,20 @@ with st.spinner("Loading ..."):
                 f"Sorry, there was a problem processing your Lyric Library./n {e}"
             )
             lyriclibary = None
-        lang = st.selectbox("Select language to download", lan_list)
+
         #data = df
 
 
     if lyriclibary is not None:
         lyriclibary.seek(0)
         #Upload English SRT
-        english_subs = st.sidebar.file_uploader("Upload Reference SRT File:", encoding =None)#, key = 'a', type=("srt"))
+        english_subs = st.sidebar.file_uploader("Upload Reference SRT File:")#, key = 'a', type=("srt"))
         if english_subs is None:
             st.write("Please upload Reference SRT")
-        if english_subs is not None:
+        else:
             english_subs.seek(0)
             try:
-                with st.spinner("Uploading your Reference SRT..."):
+                with st.spinner("Loading SRT..."):
                     g = BytesIO(english_subs.read())  ## BytesIO Object
                     temporary_location = "captions.srt"
 
@@ -122,14 +123,17 @@ with st.spinner("Loading ..."):
                     # close file
                     out.close()
                     data = srttoexcel()
-                    exceltosrt(data)
+                    lang = st.selectbox("Select language to download", lan_list)
+                    if exceltosrt(data, refLang, lang) == lang:
+                        if st.button('Process'):
+                            st.markdown(get_binary_file_downloader_html(lang+'.srt', 'Subs'), unsafe_allow_html=True)
             except Exception as e:
                 st.error(
                     f"Sorry, there was a problem processing your Reference SRT./n {e}"
                 )
                 english_subs = None
 
-            st.markdown(get_binary_file_downloader_html(lang+'.srt', 'Subs'), unsafe_allow_html=True)
+
             #if st.button('Download input as a text file'):
             #    tmp_download_link = download_link(lang+".srt", lang+".srt", 'Click here to download your text!')
             #    st.markdown(tmp_download_link, unsafe_allow_html=True)
