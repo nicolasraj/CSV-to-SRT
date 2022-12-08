@@ -89,8 +89,8 @@ with st.spinner("Loading ..."):
                 df = pd.read_csv(lyriclibary)#, dtype=str)
                 df = df.fillna('')
                 lan_list = df.columns.tolist()
-                refLang = st.sidebar.selectbox("Select reference language", lan_list)
-                lan_list.remove(refLang)
+                refLang = 'English'#st.sidebar.selectbox("Select reference language", lan_list)
+                lan_list.remove('English')
 
                 #st.success('Done!')
             st.subheader("Lyric Library")
