@@ -69,7 +69,7 @@ def get_binary_file_downloader_html(bin_file, file_label='File'):
     return href
 
 #"""Used to write the page in the app.py file"""
-st.set_option('deprecation.showfileUploaderEncoding', False)
+#st.set_option('deprecation.showfileUploaderEncoding', False)
 with st.spinner("Loading ..."):
     #title of microservice
     #st.image('kingdomcity.gif')
